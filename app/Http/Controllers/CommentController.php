@@ -12,7 +12,7 @@ class CommentController extends Controller
    
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => []]);
+       // $this->middleware('auth:api', ['except' => []]);
     }
 
     public function get_comments(Request $request){
@@ -24,6 +24,7 @@ class CommentController extends Controller
          }
         
         if(count($comments)>0){
+            
             $comments_arr=Array();
             foreach($comments as $k=>$comment){
                 if($comment["parent_comment_id"]==0) {
@@ -42,20 +43,7 @@ class CommentController extends Controller
                     
                 }
              }
-             /*if(count($comments)>0){
-                foreach($comments_arr as $key=>$comment_arr){
-                    foreach($comments as $k=>$comment){
-                        if($key==$comment["parent_comment_id"]) $comments_arr[$key]["reply"][$comment["id"]]=$comment;
-                        unset($comments[$k]);
-                        
-                    }
-                    
-                }
-             }*/
-
-           
-           
-
+          
             return response()->json($comments_arr);
 
        } else return response()->json(['message' => 'Comment not Found']);
@@ -63,17 +51,6 @@ class CommentController extends Controller
        
    }
 
-   public function get_comment_list($comments_arr,$comments,$parent_comment_id){
-        
-        foreach($comments as $k=>$comment){
-            if($comment["parent_comment_id"]!=0 && $comment["id"]!=$parent_comment_id && $comment["parent_comment_id"]==$parent_comment_id){
-                $comments_arr[$parent_comment_id]["replay"]=$this->get_comment_list($comments_arr,$comments,$comment["id"]);
-                return $comments_arr;
-            }
-           
-        }
-        return $comments_arr;
-   }
     public function get_comment(Request $request){
         try{
          $comment=Comment::get()->where("id",$request->commentId)->where("is_deleted",0);
@@ -98,7 +75,7 @@ class CommentController extends Controller
  
          $comment = Comment::create([
              'article_id' => $request->article_id,
-             'user_id' => Auth::id(),
+             'user_id' => $request->loginId,
              'parent_comment_id' => ($request->parent_comment_id?$request->parent_comment_id:0),
              'content' => $request->content,
              'published_at'=> now(),
@@ -113,14 +90,14 @@ class CommentController extends Controller
         $reqdata = $request->all(); 
         
         //return response()->json($reqdata);
-        $comment= Comment::where('id',$request->id)->where('user_id',Auth::id())->update($reqdata);
+        $comment= Comment::where('id',$request->id)->where('user_id',$request->loginId)->update($reqdata);
         //return response()->json($comment);              
             return response()->json(['message' => 'Comment Updated Successfully']);
       
     }
 
     public function delete(Request $request){
-        $comment= Comment::where('id',$request->commentId)->where('user_id',Auth::id())->update(Array('is_deleted'=>1));
+        $comment= Comment::where('id',$request->commentId)->where('user_id',$request->loginId)->update(Array('is_deleted'=>1));
         
         return response()->json(['message' => 'Comment Deleted Successfully']);
     }

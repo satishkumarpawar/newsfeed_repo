@@ -25,7 +25,8 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+       // $this->middleware('auth:api', ['except' => ['login','register']]);
+       
        
     }
 
@@ -147,9 +148,9 @@ class UserController extends Controller
         if($request->hasFile('image'))  $image=$request->file('image');
         unset($reqdata['image']);
         //$reqdata['last_ip']=
-        $user= User::where('id',$this->guard()->user()->id)->update($reqdata);
+        $user= User::where('id',$request->loginId)->update($reqdata);
         if ($user) {
-            $user=User::get()->where("id",$this->guard()->user()->id);
+            $user=User::get()->where("id",$request->loginId);
             if(count($user)>0){
                 $user=current((Array)$user);
                 $key_first=array_key_first($user);
@@ -160,10 +161,10 @@ class UserController extends Controller
             }
            
             
-           // $urls=Array(Array("url"=>$url,"caption"=>$this->guard()->user()->name . '_' . $this->guard()->user()->id));
+           // $urls=Array(Array("url"=>$url,"caption"=>$this->guard()->user()->name . '_' . $request->loginId));
            // $image_ids= ImageController::SaveImageUrl($urls,$path='images/profile/',0,0);
           if($image->isValid()){
-            $images["images"][]=Array("image"=>$image,"caption"=>$this->guard()->user()->name . '_' . $this->guard()->user()->id);
+            $images["images"][]=Array("image"=>$image,"caption"=>$this->guard()->user()->name . '_' . $request->loginId);
             $image_ids= ImageController::SaveImagePost($images,$path='images/profile/',0,0);
             
             $reqdata['image_id']=  $image_ids[0];
@@ -172,7 +173,7 @@ class UserController extends Controller
             if(!empty($reqdata['image_id'])){
                 $reqdata['image_id']=$reqdata['image_id'];    
              }
-             $user= User::where('id',$this->guard()->user()->id)->update($reqdata);
+             $user= User::where('id',$request->loginId)->update($reqdata);
              return response()->json(['message' => 'User Updated Successfully']);
          }else{
  
@@ -211,12 +212,12 @@ class UserController extends Controller
     }
     function save_token($token){
         /*$data['token']=$token;
-        User::where('id',$this->guard()->user()->id)->update($data);*/
+        User::where('id',$request->loginId)->update($data);*/
     }
     function last_active(){
         $data['last_ip']=$this->get_client_ip();
         $data['last_active']=date('Y-m-d-H:i:s');
-        User::where('id',$this->guard()->user()->id)->update($data);
+        User::where('id',$request->loginId)->update($data);
     }
     function get_client_ip() {
         $ipaddress = '';

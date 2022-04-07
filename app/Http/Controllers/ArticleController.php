@@ -15,7 +15,7 @@ class ArticleController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => []]);
+        //$this->middleware('auth:api', ['except' => []]);
     }
     //
     public function get_articles(Request $request){
@@ -28,7 +28,7 @@ class ArticleController extends Controller
          
 
          foreach($articles as $k=>$article){
-            $liked=Article_who_like::where("user_id",Auth::id())->where("article_id",$article["id"])->get();
+            $liked=Article_who_like::where("user_id",$request->loginId)->where("article_id",$article["id"])->get();
             $article['user_liked']=(count($liked)>0?1:0);
 
             $image_data =  DB::table('article_image')->select()->where("article_id",$article['id'])->get();
@@ -67,6 +67,7 @@ class ArticleController extends Controller
     }
 
     public function get_article(Request $request){
+       
        try{
         $article=Article::get()->where("id",$request->articleId)->where("is_deleted",0);
       } catch(Exception $e){
@@ -77,7 +78,7 @@ class ArticleController extends Controller
             $key_first=array_key_first($article);
             $article=$article[$key_first];
 
-            $liked=Article_who_like::where("user_id",Auth::id())->where("article_id",$request->articleId)->get();
+            $liked=Article_who_like::where("user_id",$request->loginId)->where("article_id",$request->articleId)->get();
             $article['user_liked']=(count($liked)>0?1:0);
 
             $image_data =  DB::table('article_image')->select()->where("article_id",$article['id'])->get();
@@ -116,7 +117,7 @@ class ArticleController extends Controller
         $article = Article::create([
             'heading' => $request->heading,
             'content' => $request->content,
-            'user_id' =>Auth::id(),
+            'user_id' =>$request->loginId,
             'published_at'=>now(),
             
           ]);
@@ -147,7 +148,7 @@ class ArticleController extends Controller
        
         unset($reqdata["images"]);
         //return response()->json($reqdata);
-        $article= Article::where('id',$request->id)->where('user_id',Auth::id())->update($reqdata);
+        $article= Article::where('id',$request->id)->where('user_id',$request->loginId)->update($reqdata);
         //return response()->json($article);
         if($article){
            
@@ -171,7 +172,7 @@ class ArticleController extends Controller
     }
 
     public function delete(Request $request){
-        $article= Article::where('id',$request->articleId)->where('user_id',Auth::id())->update(Array('is_deleted'=>1));
+        $article= Article::where('id',$request->articleId)->where('user_id',$request->loginId)->update(Array('is_deleted'=>1));
         
         // $is_droped=  DB::table('article_image')->where("article_id",$request->articleId)->whereIn('image_id',$image_ids)->delete();
        
@@ -191,14 +192,14 @@ class ArticleController extends Controller
     public function likes(Request $request){
         $request->like;
         if($request->like){
-            $wholiked = Array("user_id"=>Auth::id(),"article_id"=>$request->id,"status"=>1);
+            $wholiked = Array("user_id"=>$request->loginId,"article_id"=>$request->id,"status"=>1);
             Article_who_like::insert($wholiked);
             //DB::table('article_who_likes')->insert($wholiked);
             $article= Article::where('id',$request->id)->update(Array('like_count'=>DB::raw('like_count+1')));
             return response()->json(['message' => 'Article Greated Successfully']);
         } else {
-            Article_who_like::where("user_id",Auth::id())->where("article_id",$request->id)->delete();
-            //DB::table('article_who_likes')->where("user_id",Auth::id())->where("article_id",$request->id)->delete();
+            Article_who_like::where("user_id",$request->loginId)->where("article_id",$request->id)->delete();
+            //DB::table('article_who_likes')->where("user_id",$request->loginId)->where("article_id",$request->id)->delete();
             $article= Article::where('id',$request->id)->update(Array('like_count'=>DB::raw('like_count-1')));
 
             return response()->json(['message' => 'Article unGreated Successfully']);

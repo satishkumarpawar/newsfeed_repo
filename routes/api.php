@@ -32,9 +32,9 @@ Route::group([
     Route::post('login', 'UserController@login');
     Route::get('logout', 'UserController@logout');
     Route::get('refresh', 'UserController@refresh');
-    Route::get('me', 'UserController@me');
-    Route::get('profile/{userId}', 'UserController@profile');
-    Route::post('update', 'UserController@update');
+    Route::get('me/{loginId}', 'UserController@me');
+    Route::get('profile/{loginId}', 'UserController@profile');
+    Route::post('update/{loginId}', 'UserController@update');
     //Route::get('delete', 'UserController@delete');
 });
   /*
@@ -63,10 +63,10 @@ Route::group([
 ], function ($router) {
 
     //Gallery
-    Route::get('getlist', 'GalleryController@get_gallery_images');
-    Route::post('upload', 'GalleryController@upload');
-    Route::post('delete', 'GalleryController@delete');
-    Route::get('image/', 'GalleryController@get_image'); 
+    Route::get('{loginId}/getlist', 'GalleryController@get_gallery_images');
+    Route::post('{loginId}/upload', 'GalleryController@upload');
+    Route::post('{loginId}/delete', 'GalleryController@delete');
+    Route::get('{loginId}/image/', 'GalleryController@get_image'); 
 });
 
 
@@ -79,15 +79,15 @@ Route::group([
 ], function ($router) {
 
     //Article 
-    Route::get('getlist', 'ArticleController@get_articles');
-    Route::get('get/{articleId}', 'ArticleController@get_article');
+    Route::get('{loginId}/getlist', 'ArticleController@get_articles');
+    Route::get('{loginId}/get/{articleId}', 'ArticleController@get_article');
     // Route::get('getlist/{categoryId}', 'ArticleController@get_category_articles');
     //Route::get('search', 'ArticleController@search_article');
-    Route::post('create', 'ArticleController@create');
-    Route::post('update', 'ArticleController@update');
-    Route::get('delete/{articleId}', 'ArticleController@delete');
-    Route::post('deleteimage', 'ArticleController@deleteImage');
-    Route::post('like', 'ArticleController@likes');
+    Route::post('{loginId}/create', 'ArticleController@create');
+    Route::post('{loginId}/update', 'ArticleController@update');
+    Route::get('{loginId}/delete/{articleId}', 'ArticleController@delete');
+    Route::post('{loginId}/deleteimage', 'ArticleController@deleteImage');
+    Route::post('{loginId}/like', 'ArticleController@likes');
 });
 
 Route::group([
@@ -97,11 +97,11 @@ Route::group([
 
 ], function ($router) {
     //Comment
-    Route::get('getlist/{articleId}', 'CommentController@get_comments');
-    Route::get('get/{commentId}', 'CommentController@get_comment');
-    Route::post('create', 'CommentController@create');
-    Route::post('reply', 'CommentController@create');
-    Route::post('update', 'CommentController@update');
-    Route::get('delete/{commentId}', 'CommentController@delete');
+    Route::get('{loginId}/getlist/{articleId}', 'CommentController@get_comments');
+    Route::get('{loginId}/get/{commentId}', 'CommentController@get_comment');
+    Route::post('{loginId}/create', 'CommentController@create');
+    Route::post('{loginId}/reply', 'CommentController@create');
+    Route::post('{loginId}/update', 'CommentController@update');
+    Route::get('{loginId}/delete/{commentId}', 'CommentController@delete');
 });
 

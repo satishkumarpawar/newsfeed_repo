@@ -14,7 +14,7 @@ class GalleryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['get_image']]);
+       // $this->middleware('auth:api', ['except' => ['get_image']]);
     }
 
     public function get_image(){
@@ -102,18 +102,18 @@ class GalleryController extends Controller
                     $img_urls[$k]["caption"]=(isset($img_url["caption"])?$img_url["caption"]:$request->heading."_".$k)."_".$id;
                 }*/
             }
-            $image_ids= ImageController::SaveImagePost($images,$path='images/user-gallery/'.Auth::id()."/",0,0);
+            $image_ids= ImageController::SaveImagePost($images,$path='images/user-gallery/'.$request->loginId."/",0,0);
                
-            //$image_ids= ImageController::SaveImageUrl($img_urls,$path='images/user-gallery/'.Auth::id()."/",0,0);
+            //$image_ids= ImageController::SaveImageUrl($img_urls,$path='images/user-gallery/'.$request->loginId."/",0,0);
             if(count($image_ids)>0){
                 $gallery_image_images= Array();
                 foreach($image_ids as $image_id){
                     $gallery_image_img = Array();
-                    $gallery_image_img['user_id']=Auth::id();
+                    $gallery_image_img['user_id']=$request->loginId;
                     $gallery_image_img['image_id']=$image_id;
                     DB::table('gallery_images')->insert($gallery_image_img);
                     /*$gallery_image = GalleryImage::create([
-                        'user_id' =>Auth::id(),
+                        'user_id' =>$request->loginId,
                         'image_id'=>$image_id,   
                       ]);*/
                    
@@ -135,22 +135,22 @@ class GalleryController extends Controller
     public function delete(Request $request){
         $image_ids=$request->images;
         if(sizeof($image_ids)>0){
-            //$image_data= GalleryImage::whereIn('image_id',$image_ids)->where('user_id',Auth::id());
-          /* $image_data =  DB::table('gallery_images')->select()->whereIn('image_id',$image_ids)->where("user_id",Auth::id())->get();
+            //$image_data= GalleryImage::whereIn('image_id',$image_ids)->where('user_id',$request->loginId);
+          /* $image_data =  DB::table('gallery_images')->select()->whereIn('image_id',$image_ids)->where("user_id",$request->loginId)->get();
             if(count($image_data)>0){
                 $image_ids=Array();
                 foreach($image_data as $img)$image_ids[]=$img->image_id;
                 if(count($image_ids)>0){
                    $is_droped= ImageController::DeleteImage($image_ids);
-                    //if($is_droped)$is_droped= GalleryImage::delete()->whereIn('image_id',$image_ids)->where('user_id',Auth::id());
-                    if($is_droped)$is_droped=  DB::table('gallery_images')->delete()->whereIn('image_id',$image_ids)->where("user_id",Auth::id());
+                    //if($is_droped)$is_droped= GalleryImage::delete()->whereIn('image_id',$image_ids)->where('user_id',$request->loginId);
+                    if($is_droped)$is_droped=  DB::table('gallery_images')->delete()->whereIn('image_id',$image_ids)->where("user_id",$request->loginId);
            
                 }    
             }*/
             $is_droped= ImageController::DeleteImage($image_ids);
             //response()->json($image_ids);
-            //if($is_droped)$is_droped= GalleryImage::delete()->whereIn('image_id',$image_ids)->where('user_id',Auth::id());
-            if($is_droped && sizeof($image_ids)>0)$is_droped=  DB::table('gallery_images')->where("user_id",Auth::id())->whereIn('image_id',$image_ids)->delete();
+            //if($is_droped)$is_droped= GalleryImage::delete()->whereIn('image_id',$image_ids)->where('user_id',$request->loginId);
+            if($is_droped && sizeof($image_ids)>0)$is_droped=  DB::table('gallery_images')->where("user_id",$request->loginId)->whereIn('image_id',$image_ids)->delete();
            
         }
         return response()->json(['message' => 'Selected Gallery Images are Deleted Successfully']);
