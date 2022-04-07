@@ -44,6 +44,7 @@ class Article extends Model
     {
         return $builder->where('is_deleted', 0);
     }
+    
 
     public function scopePublished(Builder $builder)
     {

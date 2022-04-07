@@ -18,9 +18,9 @@ class CreateArticleWhoLikesTable extends Migration
             $table->integer('user_id')->unsigned()->nullable();
             $table->foreign('user_id')
                 ->references('id')
-                ->on('users');
+                ->on('users') 
+                ->onDelete('cascade');
             $table->integer('article_id')->unsigned()->default(0);
-            $table->integer('comment_likes')->unsigned()->default(0)->comment('1 for like 2 for dislike ');
             $table->string('status',50);
             $table->timestamps();
         });

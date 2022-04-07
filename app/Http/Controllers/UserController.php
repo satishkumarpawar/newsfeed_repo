@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -11,6 +10,9 @@ use App\Models\Image;
 use Image as Media;
 use Storage;
 //use Image;
+use File;
+use Validate;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class UserController extends Controller
 {
@@ -75,6 +77,12 @@ class UserController extends Controller
         $this->last_active();
         if(!empty($user['image_id'])){
             $image_data = Image::get()->where("id",$user['image_id']);
+            $image_data=current((Array)$image_data);
+            $key_first=array_key_first($image_data);
+            $image_data=$image_data[$key_first];
+            $publicPath="/";
+            $image_data["src"]=  url('/').$publicPath.$image_data["src"];
+            $image_data["thumb"]=  url('/').$publicPath.$image_data["thumb"];
             $user["image"]=$image_data;
         }
             return response()->json($user);
@@ -89,6 +97,12 @@ class UserController extends Controller
             $user=$user[$key_first];
             if(!empty($user['image_id'])){
                 $image_data = Image::get()->where("id",$user['image_id']);
+                $image_data=current((Array)$image_data);
+                $key_first=array_key_first($image_data);
+                $image_data=$image_data[$key_first];
+                $publicPath="/";
+                $image_data["src"]=  url('/').$publicPath.$image_data["src"];
+                $image_data["thumb"]=  url('/').$publicPath.$image_data["thumb"];
                 $user["image"]=$image_data;
             }
         }
@@ -118,9 +132,19 @@ class UserController extends Controller
     }
 
     public function update(Request $request){
+        /*return response()->json([
+            '$_FILES' => $_FILES,
+            'RequestAll' => $request->all(),
+            'hasfile' => $request->hasFile('image'),
+            'isValid' => $request->file('image')->isValid(),
+            'temp_name' =>  $request->file('image')->getPathName(),
+           'name' => $request->file('image')->getClientOriginalName(),
+           'ext' => $request->file('image')->getClientOriginalExtension(),
+           'size' => $request->file('image')->getSize()
+        ]);*/
         $reqdata = $request->all(); 
         unset($reqdata['password']);
-        $url=$reqdata['image'];
+        if($request->hasFile('image'))  $image=$request->file('image');
         unset($reqdata['image']);
         //$reqdata['last_ip']=
         $user= User::where('id',$this->guard()->user()->id)->update($reqdata);
@@ -136,15 +160,20 @@ class UserController extends Controller
             }
            
             
-            $urls=Array(Array("url"=>$url,"caption"=>$this->guard()->user()->name . '_' . $this->guard()->user()->id));
-            $image_ids= ImageController::SaveImageUrl($urls,$path='images/profile/',0,0);
+           // $urls=Array(Array("url"=>$url,"caption"=>$this->guard()->user()->name . '_' . $this->guard()->user()->id));
+           // $image_ids= ImageController::SaveImageUrl($urls,$path='images/profile/',0,0);
+          if($image->isValid()){
+            $images["images"][]=Array("image"=>$image,"caption"=>$this->guard()->user()->name . '_' . $this->guard()->user()->id);
+            $image_ids= ImageController::SaveImagePost($images,$path='images/profile/',0,0);
+            
             $reqdata['image_id']=  $image_ids[0];
+        }
+           
             if(!empty($reqdata['image_id'])){
-                $reqdata['image_id']=$reqdata['image_id'];
-                $user= User::where('id',$this->guard()->user()->id)->update($reqdata);
-                return response()->json(['message' => 'User Updated Successfully']);
+                $reqdata['image_id']=$reqdata['image_id'];    
              }
- 
+             $user= User::where('id',$this->guard()->user()->id)->update($reqdata);
+             return response()->json(['message' => 'User Updated Successfully']);
          }else{
  
              return 'false';

@@ -58,6 +58,22 @@ Route::group([
 Route::group([
     'middleware' => 'api',
     'namespace' => 'App\Http\Controllers',
+    'prefix' => 'gallery'
+
+], function ($router) {
+
+    //Gallery
+    Route::get('getlist', 'GalleryController@get_gallery_images');
+    Route::post('upload', 'GalleryController@upload');
+    Route::post('delete', 'GalleryController@delete');
+    Route::get('image/', 'GalleryController@get_image'); 
+});
+
+
+
+Route::group([
+    'middleware' => 'api',
+    'namespace' => 'App\Http\Controllers',
     'prefix' => 'article'
 
 ], function ($router) {
@@ -70,6 +86,8 @@ Route::group([
     Route::post('create', 'ArticleController@create');
     Route::post('update', 'ArticleController@update');
     Route::get('delete/{articleId}', 'ArticleController@delete');
+    Route::post('deleteimage', 'ArticleController@deleteImage');
+    Route::post('like', 'ArticleController@likes');
 });
 
 Route::group([
@@ -82,6 +100,7 @@ Route::group([
     Route::get('getlist/{articleId}', 'CommentController@get_comments');
     Route::get('get/{commentId}', 'CommentController@get_comment');
     Route::post('create', 'CommentController@create');
+    Route::post('reply', 'CommentController@create');
     Route::post('update', 'CommentController@update');
     Route::get('delete/{commentId}', 'CommentController@delete');
 });

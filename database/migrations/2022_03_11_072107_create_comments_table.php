@@ -27,11 +27,12 @@ class CreateCommentsTable extends Migration
                 ->on('users')
                 ->onDelete('cascade');
             $table->integer('parent_comment_id')->unsigned()->nullable();
-            $table->foreign('parent_comment_id')
+           /* $table->foreign('parent_comment_id')
                 ->references('id')
                 ->on('comments')
-                ->onDelete('cascade');
+                ->onDelete('cascade');*/
             $table->integer('is_published')->unsigned()->default(1);
+            $table->integer('is_deleted')->unsigned()->default(1);
             $table->dateTime('published_at')->nullable();
            $table->timestamps();
         });
