@@ -38,9 +38,9 @@ class UserController extends Controller
         'password' => bcrypt($request->password),
       ]);
       
-
-      $token = auth()->login($user);
-      return $this->respondWithToken($token);
+      return response()->json(["Registered successfully"], 200);
+     // $token = auth()->login($user);
+     // return $this->respondWithToken($token);
     }
     /**
      * Get a JWT token via given credentials.
@@ -109,6 +109,28 @@ class UserController extends Controller
         }
             return response()->json($user);
     }
+
+    public function user_short_info($user_id=0)
+{
+    if($user_id==0) return Array();
+    $user=User::get()->where("id",$user_id);
+   if(count($user)>0){
+        $user=current((Array)$user);
+        $key_first=array_key_first($user);
+        $user=$user[$key_first];
+        if(!empty($user['image_id'])){
+            $image_data = Image::get()->where("id",$user['image_id']);
+            $image_data=current((Array)$image_data);
+            $key_first=array_key_first($image_data);
+            $image_data=$image_data[$key_first];
+            $publicPath="/";
+            $image_data["src"]=  url('/').$publicPath.$image_data["src"];
+            $image_data["thumb"]=  url('/').$publicPath.$image_data["thumb"];
+            $user["image"]=$image_data;
+        }
+    }
+        return $user;
+}
     /**
      * Log the user out (Invalidate the token)
      *

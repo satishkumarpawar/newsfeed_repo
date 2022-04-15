@@ -32,7 +32,7 @@ class CreateCommentsTable extends Migration
                 ->on('comments')
                 ->onDelete('cascade');*/
             $table->integer('is_published')->unsigned()->default(1);
-            $table->integer('is_deleted')->unsigned()->default(1);
+            $table->integer('is_deleted')->unsigned()->default(0);
             $table->dateTime('published_at')->nullable();
            $table->timestamps();
         });

@@ -27,7 +27,7 @@ Route::group([
     'prefix' => 'user'
 
 ], function ($router) {
-
+   
     Route::post('register', 'UserController@register');
     Route::post('login', 'UserController@login');
     Route::get('logout', 'UserController@logout');

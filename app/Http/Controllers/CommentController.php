@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use App\Http\Controllers\UserController;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 
@@ -28,23 +29,34 @@ class CommentController extends Controller
             $comments_arr=Array();
             foreach($comments as $k=>$comment){
                 if($comment["parent_comment_id"]==0) {
+                    $user_info=UserController::user_short_info($comment["user_id"]);
+                    $comment["user_info"]=$user_info;
+                    $comment["reply"]=Array();
                     $comments_arr[$comment["id"]]=$comment;
                     unset($comments[$k]);
                 }
              }
+
              if(count($comments)>0){
                 foreach($comments_arr as $key=>$comment_arr){
+                    $replys_arr=Array();
                     foreach($comments as $k=>$comment){
                         if($key==$comment["parent_comment_id"]){
-                            $comments_arr[$key]["reply"]=$comment;
+                            $user_info=UserController::user_short_info($comment["user_id"]);
+                            $comment["user_info"]=$user_info;
+                            $replys_arr[]=$comment;
                             unset($comments[$k]);
                          }
                     }
-                    
+                    $comments_arr[$key]["reply"]=$replys_arr;
                 }
              }
           
-            return response()->json($comments_arr);
+             $comments =Array();
+            foreach($comments_arr as $k=>$v){
+                $comments[]=$v;
+            }
+            return response()->json($comments);
 
        } else return response()->json(['message' => 'Comment not Found']);
        
@@ -57,6 +69,7 @@ class CommentController extends Controller
        } catch(Exception $e){
          return response()->json(['message' => 'Comment not Found']);
        }
+       return response()->json($comment);
          if(count($comment)>0){
              $comment=current((Array)$comment);
              $key_first=array_key_first($comment);

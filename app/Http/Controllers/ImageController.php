@@ -17,6 +17,13 @@ use Illuminate\Contracts\Validation\Validator;
 class ImageController extends Controller
 {
   
+    public function clean($string) {
+        $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
+        $string = preg_replace('/[^A-Za-z0-9\-]/', '', $string); // Removes special chars.
+     
+        return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.
+     }
+
     public function SaveImagePost($images_arr,$path='/',$width=0,$height=0)
     {
         if(empty($path))$path="images/profile/";
@@ -55,15 +62,16 @@ class ImageController extends Controller
                         $ext=$image->getClientOriginalExtension();
                         if(isset($imgarr->caption)){
                             $caption=$imgarr->caption;
-                            $caption=str_replace(" ","_",strtolower($caption));
-                            $filename = $caption . '.' .$ext;
+                               
                         } else {
-                            $filename =  uniqid() . $image->getClientOriginalName();
+                            $filename =  $image->getClientOriginalName();
                             $filenamearr=explode(".", $filename);
                             $caption=$filenamearr[0];
                             $ext=$filenamearr[1];
                         }
-                        
+                    
+                        $filename=$this->clean(strtolower($caption));
+                        $filename = uniqid() .  $filename . '.' .$ext;
 
                         if($width!=0 && $height!=0) $img = Media::make($image->getRealPath())->resize($width, $height)->save($publicPath.$filename);
                         else $img = Media::make($image->getRealPath())->save($publicPath.$filename);
